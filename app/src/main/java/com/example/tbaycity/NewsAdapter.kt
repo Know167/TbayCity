@@ -1,5 +1,6 @@
 package com.example.tbaycity
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,7 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
-class NewsAdapter(private val newsList:ArrayList<News>): RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
+class NewsAdapter(private val newsList:ArrayList<News>,private val onItemClicked: (News) -> Unit): RecyclerView.Adapter<NewsAdapter.MyViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsAdapter.MyViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.recycler_layout_events,parent,false)
         return MyViewHolder(itemView)
@@ -21,12 +22,21 @@ class NewsAdapter(private val newsList:ArrayList<News>): RecyclerView.Adapter<Ne
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         val news:News = newsList[position]
+
+        if (news.eventImageLink=="null"){
+            Log.d("news",news.eventImageLink)
+            news.eventImageLink = "https://placehold.co/600x400/png"
+        }
         Glide.with(holder.eventImage.context).load(news.eventImageLink).centerCrop().into(holder.eventImage)
 //        holder.eventDescription.text = event.description
         holder.eventTitle.text = news.title
-        holder.eventDate.text = news.dateTime
+        val timestamp = news.dateTime
+        val date = timestamp?.toDate()
+        holder.eventDate.text = date.toString()
 //        holder.eventDate.text = parseFirebaseTimestamp(news.dateTime)
-
+        holder.itemView.setOnClickListener {
+            onItemClicked(news)
+        }
     }
 
     override fun getItemCount(): Int {

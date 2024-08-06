@@ -13,9 +13,9 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
-class EventAdapter(private val eventList:ArrayList<Events>): RecyclerView.Adapter<EventAdapter.MyViewHolder>() {
+class EventAdapter(private val eventList:ArrayList<Events>,private val onItemClicked: (Events) -> Unit): RecyclerView.Adapter<EventAdapter.MyViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EventAdapter.MyViewHolder {
-       val itemView = LayoutInflater.from(parent.context).inflate(R.layout.recycler_layout_events,parent,false)
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.recycler_layout_events,parent,false)
         return MyViewHolder(itemView)
     }
 
@@ -26,6 +26,9 @@ class EventAdapter(private val eventList:ArrayList<Events>): RecyclerView.Adapte
         holder.eventTitle.text = event.title
         holder.eventDate.text = event.startTimeEndTime
 //        holder.eventDate.text = parseFirebaseTimestamp(event.date)
+        holder.itemView.setOnClickListener {
+            onItemClicked(event)
+        }
 
     }
 
@@ -35,7 +38,7 @@ class EventAdapter(private val eventList:ArrayList<Events>): RecyclerView.Adapte
     public class MyViewHolder(itemView: View):RecyclerView.ViewHolder(itemView){
         val eventImage = itemView.findViewById<ImageView>(R.id.event_image)
         val eventTitle = itemView.findViewById<TextView>(R.id.event_title)
-//        val eventDescription = itemView.findViewById<TextView>(R.id.event_description)
+        //        val eventDescription = itemView.findViewById<TextView>(R.id.event_description)
         val eventDate = itemView.findViewById<TextView>(R.id.event_date)
     }
 
