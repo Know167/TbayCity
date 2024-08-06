@@ -3,19 +3,18 @@ package com.example.tbaycity
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.ArrayList
 
 class EventFragment : Fragment() {
     private lateinit var eventBtn: Button
@@ -80,14 +79,37 @@ class EventFragment : Fragment() {
 
     private fun createEventRecyclerView() {
         eventList = arrayListOf()
-        eventAdapter = EventAdapter(eventList)
+        eventAdapter = EventAdapter(eventList){ data->
+            val bundle = Bundle()
+            bundle.putString("title",data.title)
+            val timestamp = data.date
+            val date = timestamp?.toDate()
+            bundle.putString("date",data.startTimeEndTime.toString())
+            bundle.putString("description",data.description.toString())
+            bundle.putString("address",data.location.toString())
+            bundle.putString("image",data.eventImageURL.toString())
+            bundle.putString("category","event")
+            changeFragment(EventDetailFragment(),bundle)
+
+
+        }
         recyclerView.adapter = eventAdapter
         attachEventData()
     }
 
     private fun createNewsRecyclerView() {
         newsList = arrayListOf()
-        newsAdapter = NewsAdapter(newsList)
+        newsAdapter = NewsAdapter(newsList){data->
+            val bundle = Bundle()
+            bundle.putString("title",data.title)
+            bundle.putString("link",data.link)
+            bundle.putString("image",data.eventImageLink)
+            val timestamp = data.dateTime
+            val date = timestamp?.toDate()
+            bundle.putString("datetime",date.toString())
+            bundle.putString("category","news")
+            changeFragment(EventDetailFragment(),bundle)
+        }
         recyclerView.adapter = newsAdapter
         attachNewsData()
     }
@@ -110,11 +132,9 @@ class EventFragment : Fragment() {
                         title = data["title"].toString(),
                         eventImageLink = data["eventImageLink"].toString(),
                         link = data["link"].toString(),
-                        dateTime = parsedDate.toString() // Update with Date object
+                        dateTime = (data["datetime"] as com.google.firebase.Timestamp)
                     )
-                    if (parsedDate != null) {
-                        newsItems.add(item)
-                    }
+                    newsItems.add(item)
                 }
 
                 // Sort by parsedDate in descending order and get the top 5
@@ -152,5 +172,13 @@ class EventFragment : Fragment() {
                 }
                 eventAdapter.notifyDataSetChanged()
             }
+    }
+    private fun changeFragment(fragment: Fragment, bundle:Bundle){
+        val fragmentManager = parentFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragment.arguments=bundle
+        fragmentTransaction.replace(R.id.frame_layout,fragment)
+        fragmentTransaction.addToBackStack(null)
+        fragmentTransaction.commit()
     }
 }
